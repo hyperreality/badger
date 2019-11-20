@@ -41,6 +41,7 @@ import (
 	"github.com/dgraph-io/badger/v2/options"
 	"github.com/dgraph-io/badger/v2/pb"
 	"github.com/dgraph-io/badger/v2/y"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/net/trace"
 )
@@ -1222,7 +1223,14 @@ func (req *request) DecrRef() {
 }
 
 func (req *request) Wait() error {
+	uuid := uuid.New()
+	if len(req.Entries) > 0 {
+		for _, e := range req.Entries {
+			fmt.Printf("%s waiting for req %s\n", uuid, e.Key)
+		}
+	}
 	req.Wg.Wait()
+	fmt.Printf("%s done waiting", uuid)
 	err := req.Err
 	req.DecrRef() // DecrRef after writing to DB.
 	return err
